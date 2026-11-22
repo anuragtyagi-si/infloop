@@ -26,7 +26,7 @@ npm run preview
 - **Pricing:** Pilot ($1K–$10K), Growth ($10K–$75K), and Flagship ($75K–$300K+) plans, with an interactive campaign planner that prefills the brief builder.
 - **Start a campaign:** three-step, validated brief builder with local draft storage, creator shortlist, a review step, and JSON download.
 
-Hash routing is intentional: every page works after a direct visit or refresh on GitHub Pages without server-side routing or a 404 redirect hack.
+Clean-path browser routing uses the `/infloop/` base. The production build emits real `creators/index.html`, `pricing/index.html`, and `start/index.html` entries, so direct visits and refreshes return the app on GitHub Pages. Pages redirects directory paths to their trailing-slash URL. A `404.html` app entry handles unknown paths with the site's missing-page view. Previously shared `#/…` links are upgraded to their clean-path equivalent on load.
 
 ## Deployment
 
