@@ -10,6 +10,10 @@ function Counter({ value, suffix = '' }) {
   const [number, setNumber] = useState(0);
   const ref = useRef(null);
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setNumber(value);
+      return;
+    }
     let frame;
     const observer = new IntersectionObserver(([entry]) => {
       if (!entry.isIntersecting) return;

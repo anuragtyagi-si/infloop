@@ -150,14 +150,13 @@ export default function Track({ paused, jump, onStage, onLap, onReady }) {
     const observer=new ResizeObserver(resize);observer.observe(host);resize();
     let visible = true;
     const intersection=new IntersectionObserver(([entry]) => { visible=entry.isIntersecting; });intersection.observe(host);
-    const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let frame, previous=performance.now(), progress=0.025, lastStage=-1, lastJump=null;
     const tick=(now)=>{
       frame=requestAnimationFrame(tick);
       const delta=Math.min((now-previous)/1000,0.1);previous=now;
       if(!visible)return;
       if(state.current.jump && lastJump!==state.current.jump){progress=state.current.jump.stage/4+0.005;lastJump=state.current.jump;}
-      if(!state.current.paused&&!reduced){progress+=delta/24;if(progress>=1){progress-=1;state.current.onLap();}}
+      if(!state.current.paused){progress+=delta/24;if(progress>=1){progress-=1;state.current.onLap();}}
       const stage=Math.floor(progress*4)%4;
       if(stage!==lastStage){lastStage=stage;state.current.onStage(stage);}
       const p=curve.getPointAt(progress%1),tangent=curve.getTangentAt(progress%1);
