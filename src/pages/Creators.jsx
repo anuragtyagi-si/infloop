@@ -11,8 +11,9 @@ function ProfileDialog({ creator, close }) {
   const saved = shortlist.includes(creator.id);
   useEffect(() => {
     const modal = dialog.current;
-    modal.showModal();
-    return () => modal.close();
+    if (!modal.open) modal.showModal();
+    // Removing the dialog closes it naturally. Closing during StrictMode's
+    // effect replay would dispatch onClose and dismiss a newly opened profile.
   }, []);
   return <dialog ref={dialog} className="profile-dialog" onClose={close} onClick={event=>{if(event.target===dialog.current)close();}}><div className="profile-content"><button autoFocus className="icon-button dialog-close" onClick={close} aria-label="Close creator profile"><X/></button><img className="profile-image" src={`${import.meta.env.BASE_URL}images/${creator.image}`} alt={creator.name}/><div className="profile-details"><span className="eyebrow">{creator.niche.toUpperCase()} CREATOR</span><h2>{creator.name}</h2><p className="handle">{creator.handle}</p><span className="location"><MapPin size={14}/>{creator.location}</span><p>{creator.bio}</p><div className="profile-stats"><div><strong>{creator.followers}</strong><span>Followers</span></div><div><strong>{creator.engagement}</strong><span>Engagement</span></div></div><button className={`button ${saved?'button-outline':'button-dark'}`} onClick={()=>toggle(creator.id)}>{saved?<Check size={17}/>:<Bookmark size={17}/>} {saved?'Added to shortlist':'Add to shortlist'}</button><Link to="/start" onClick={close} className="text-link">Build your campaign <ArrowUpRight size={17}/></Link><small>Illustrative profile and metrics. Not represented talent; no booking or availability is implied.</small></div></div></dialog>;
 }
