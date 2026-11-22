@@ -11,6 +11,13 @@ import { readStored, writeStored } from './lib';
 const ShortlistContext = createContext();
 export const useShortlist = () => useContext(ShortlistContext);
 
+function focusContent(event) {
+  event.preventDefault();
+  const content = document.getElementById('main-content');
+  content?.scrollIntoView({ block: 'start' });
+  content?.focus({ preventScroll: true });
+}
+
 function ScrollToTop() {
   const location = useLocation();
   useEffect(() => {
@@ -49,7 +56,7 @@ function Header() {
 function Footer() {
   return <footer className="site-footer"><div className="container">
     <div className="footer-top"><div><Link to="/" aria-label="infloop home"><Logo /></Link><p>Good connections.<br/>Great things on repeat.</p></div><div className="footer-nav"><Link to="/creators">Find creators <ArrowUpRight size={15}/></Link><Link to="/pricing">Explore pricing <ArrowUpRight size={15}/></Link><Link to="/start">Build your brief <ArrowUpRight size={15}/></Link></div><div className="footer-signoff"><LoopMark/><span>ONE SYSTEM.<br/>INFINITE POTENTIAL.</span></div></div>
-    <div className="footer-bottom"><span>© {new Date().getFullYear()} infloop. All rights reserved.</span><span>Creators. Campaigns. Connected.</span><a href="#main-content">Back to top ↑</a></div>
+    <div className="footer-bottom"><span>© {new Date().getFullYear()} infloop. All rights reserved.</span><span>Creators. Campaigns. Connected.</span><a href="#main-content" onClick={focusContent}>Back to top ↑</a></div>
   </div></footer>;
 }
 
@@ -62,9 +69,9 @@ export default function App() {
   const toggle = id => setShortlist(previous => previous.includes(id) ? previous.filter(item => item !== id) : [...previous, id]);
   return <ShortlistContext.Provider value={{ shortlist, toggle }}>
     <ScrollToTop/>
-    <a className="skip-link" href="#main-content">Skip to content</a>
+    <a className="skip-link" href="#main-content" onClick={focusContent}>Skip to content</a>
     <Header/>
-    <main id="main-content"><Routes><Route path="/" element={<Home/>}/><Route path="/creators" element={<Creators/>}/><Route path="/pricing" element={<Pricing/>}/><Route path="/start" element={<Brief/>}/><Route path="*" element={<section className="container empty-state"><span className="eyebrow">OFF THE CIRCUIT</span><h1>Let’s get you<br/>back in the loop.</h1><Link className="button button-dark" to="/">Back to home <ArrowRight size={17}/></Link></section>}/></Routes></main>
+    <main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home/>}/><Route path="/creators" element={<Creators/>}/><Route path="/pricing" element={<Pricing/>}/><Route path="/start" element={<Brief/>}/><Route path="*" element={<section className="container empty-state"><span className="eyebrow">OFF THE CIRCUIT</span><h1>Let’s get you<br/>back in the loop.</h1><Link className="button button-dark" to="/">Back to home <ArrowRight size={17}/></Link></section>}/></Routes></main>
     <Footer/>
   </ShortlistContext.Provider>;
 }
