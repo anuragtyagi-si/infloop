@@ -23,7 +23,7 @@ function ScrollToTop() {
   useEffect(() => {
     window.scrollTo(0, 0);
     const titles = { '/': 'Influence. In full loop.', '/creators': 'Find your people', '/pricing': 'Ambition, meet your plan', '/start': 'Start your next loop' };
-    document.title = `infloop — ${titles[location.pathname] || 'Page not found'}`;
+    document.title = `infloop — ${titles[location.pathname.replace(/\/$/, '') || '/'] || 'Page not found'}`;
   }, [location.pathname]);
   return null;
 }
