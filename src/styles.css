@@ -48,10 +48,10 @@ p { line-height: 1.65; }
 .button-outline:hover { background: #edf0e6; }
 .text-link { display: inline-flex; align-items: center; gap: 11px; font-size: 12px; font-weight: 550; padding: 6px 0; background: transparent; }
 .text-link svg { transition: transform .2s; }
-.text-link:hover svg { transform: translate(3px, -2px); }
+.text-link:hover svg { transform: translateY(-1px); }
 .icon-button { display: inline-flex; align-items: center; justify-content: center; padding: 6px; background: transparent; border-radius: 4px; }
 .circle-link { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border: 1px solid #ced6c7; background: transparent; border-radius: 50%; flex-shrink: 0; transition: background .2s, transform .2s; }
-.circle-link:hover { background: var(--lime); transform: rotate(8deg); }
+.circle-link:hover { background: var(--lime); transform: translateY(-2px); }
 .skip-link { position: fixed; top: -60px; left: 20px; z-index: 200; background: var(--green); color: white; padding: 15px; }
 .skip-link:focus { top: 10px; }
 
@@ -182,7 +182,7 @@ p { line-height: 1.65; }
 .loop-item > button > span { font-size: 9px; color: #859377; }
 .loop-item > button > svg:first-of-type { margin-left: 4px; }
 .loop-item > button > svg:last-child { margin-left: auto; transition: transform .2s; }
-.loop-item.open > button > svg:last-child { transform: rotate(45deg); }
+.loop-item.open > button > svg:last-child { transform: none; }
 .loop-item h3 { font-size: 25px; letter-spacing: -.7px; }
 .loop-detail { padding: 0 12px 25px 64px; animation: reveal .3s ease; }
 .loop-detail h4 { font-size: 12px; font-weight: 500; }
@@ -876,6 +876,31 @@ fieldset { padding: 0; margin: 0; border: 0; min-width: 0; }
   .brief-steps li button { font-size: 7px; }
   .brief-form { padding-inline: 18px; }
   .form-actions .button { font-size: 8px; gap: 8px; }
+}
+/* Action icons share one visual language without changing the page composition. */
+.sr-only { position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip-path: inset(50%); white-space: nowrap; border: 0 !important; }
+:where(button, a) .lucide { flex-shrink: 0; stroke-width: 1.8; transition: transform .2s ease; }
+.button .lucide { width: 17px; height: 17px; }
+.button { gap: 10px; }
+.text-link { gap: 8px; }
+.main-nav > a:not(.button), .footer-bottom a, .summary-shortlist a, .skip-link { display: inline-flex; align-items: center; gap: 7px; }
+.footer-nav a { gap: 9px; }
+.filter-pill, .goal-option { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.goal-card > span { justify-content: flex-start; flex-wrap: wrap; gap: 6px; }
+.goal-card > span > .lucide:last-child:not(:first-child) { margin-left: auto; }
+.creator-title h2 { display: flex; align-items: center; gap: 7px; }
+.photo-button { position: relative; }
+.photo-profile-icon { position: absolute; right: 15px; bottom: 15px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--paper); color: var(--green); }
+.icon-button, .stepper button, .goal-option, .goal-card, .choice-pill, .brief-steps button, .draft-status button, .loop-item > button, .faq-item button { transition: background .2s, box-shadow .2s; }
+.icon-button:hover, .stepper button:not(:disabled):hover { background: #e8eddf; }
+.goal-option:not(.selected):hover, .goal-card:not(.selected):hover, .choice-pill:not(.selected):hover { background: #edf0e6; }
+.loop-item > button:hover, .faq-item button:hover { background: #eff2e8; }
+:where(button:not(:disabled), a):is(:hover, :focus-visible) > .lucide,
+:where(.button, .photo-button, .creator-title button):is(:hover, :focus-visible) .lucide { transform: translateY(-1px); }
+.button:disabled:hover { transform: none; box-shadow: none; }
+@media (max-width: 700px) {
+  .goal-option { flex-direction: column; gap: 6px; }
+  .brief-steps li button { gap: 5px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
