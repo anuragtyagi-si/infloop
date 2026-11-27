@@ -6,7 +6,7 @@ export function loadConfig(env = process.env) {
   return {
     port: Number(env.PORT) || 4000,
     databaseUrl: env.DATABASE_URL,
-    databaseSsl: env.DATABASE_SSL === 'true',
+    databaseSsl: env.DATABASE_SSL === 'no-verify' ? 'no-verify' : env.DATABASE_SSL === 'true',
     jwtSecret,
     // Number of reverse proxies in front of the API; 0 when it is reached directly.
     trustProxy: Number(env.TRUST_PROXY) || false,

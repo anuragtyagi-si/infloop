@@ -5,7 +5,7 @@ import pg from 'pg';
 const migrationsDir = fileURLToPath(new URL('../migrations/', import.meta.url));
 
 export function createPool({ databaseUrl, databaseSsl }) {
-  return new pg.Pool({ connectionString: databaseUrl, ssl: databaseSsl ? { rejectUnauthorized: false } : undefined });
+  return new pg.Pool({ connectionString: databaseUrl, ssl: databaseSsl ? { rejectUnauthorized: databaseSsl !== 'no-verify' } : undefined });
 }
 
 // Applies each migrations/*.sql file once, in name order, inside a transaction.
