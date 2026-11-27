@@ -5,7 +5,15 @@ import pg from 'pg';
 const migrationsDir = fileURLToPath(new URL('../migrations/', import.meta.url));
 
 export function createPool({ databaseUrl, databaseSsl }) {
-  const pool = new pg.Pool({ connectionString: databaseUrl, ssl: databaseSsl ? { rejectUnauthorized: databaseSsl !== 'no-verify' } : undefined });
+  if (!databaseSsl) return withErrorListener(new pg.Pool({ connectionString: databaseUrl }));
+  // pg lets sslmode in the URL override the ssl option, so DATABASE_SSL takes its place.
+  const url = new URL(databaseUrl);
+  url.searchParams.delete('sslmode');
+  const pool = new pg.Pool({ connectionString: url.toString(), ssl: { rejectUnauthorized: databaseSsl !== 'no-verify' } });
+  return withErrorListener(pool);
+}
+
+function withErrorListener(pool) {
   // Without a listener, a dropped idle connection would crash the process.
   pool.on('error', error => console.error('Idle PostgreSQL connection failed:', error.message));
   return pool;
