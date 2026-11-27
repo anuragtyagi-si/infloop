@@ -5,7 +5,10 @@ import pg from 'pg';
 const migrationsDir = fileURLToPath(new URL('../migrations/', import.meta.url));
 
 export function createPool({ databaseUrl, databaseSsl }) {
-  return new pg.Pool({ connectionString: databaseUrl, ssl: databaseSsl ? { rejectUnauthorized: databaseSsl !== 'no-verify' } : undefined });
+  const pool = new pg.Pool({ connectionString: databaseUrl, ssl: databaseSsl ? { rejectUnauthorized: databaseSsl !== 'no-verify' } : undefined });
+  // Without a listener, a dropped idle connection would crash the process.
+  pool.on('error', error => console.error('Idle PostgreSQL connection failed:', error.message));
+  return pool;
 }
 
 // Applies each migrations/*.sql file once, in name order, inside a transaction.
