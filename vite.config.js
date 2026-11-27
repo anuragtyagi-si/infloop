@@ -10,7 +10,7 @@ export default defineConfig({
       // route gets the same app entry with root-absolute, Vite-built assets.
       const entry = bundle['index.html'];
       if (!entry || entry.type !== 'asset') throw new Error('Missing app HTML entry');
-      for (const fileName of ['creators/index.html', 'pricing/index.html', 'start/index.html', '404.html']) {
+      for (const fileName of ['creators/index.html', 'pricing/index.html', 'start/index.html', 'login/index.html', 'dashboard/index.html', '404.html']) {
         this.emitFile({ type: 'asset', fileName, source: entry.source });
       }
     },

@@ -1,0 +1,23 @@
+{
+  "name": "infloop-api",
+  "private": true,
+  "version": "0.1.0",
+  "description": "infloop auth and campaigns API (separate from the static site)",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node src/migrate.js",
+    "test": "node --test test/api.test.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.5",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.23.1"
+  }
+}

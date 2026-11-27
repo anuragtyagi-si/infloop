@@ -1,11 +1,14 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes, useLocation } from 'react-router-dom';
-import { Menu, X, Rocket, House, Users, Target, FilePenLine, PanelTop, PanelTopOpen } from 'lucide-react';
+import { Menu, X, Rocket, House, Users, Target, FilePenLine, PanelTop, PanelTopOpen, LayoutDashboard, LogIn } from 'lucide-react';
 import Logo, { LoopMark } from './components/Logo';
 import Home from './pages/Home';
 import Creators from './pages/Creators';
 import Pricing from './pages/Pricing';
 import Brief from './pages/Brief';
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import { AuthProvider, useAuth } from './api';
 import { readStored, writeStored } from './lib';
 
 const ShortlistContext = createContext();
@@ -22,7 +25,7 @@ function ScrollToTop() {
   const location = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
-    const titles = { '/': 'Influence. In full loop.', '/creators': 'Find your people', '/pricing': 'Ambition, meet your plan', '/start': 'Start your next loop' };
+    const titles = { '/': 'Influence. In full loop.', '/creators': 'Find your people', '/pricing': 'Ambition, meet your plan', '/start': 'Start your next loop', '/login': 'Creator login', '/dashboard': 'Your campaigns' };
     document.title = `infloop — ${titles[location.pathname.replace(/\/$/, '') || '/'] || 'Page not found'}`;
   }, [location.pathname]);
   return null;
@@ -31,6 +34,7 @@ function ScrollToTop() {
 function Header() {
   const [open, setOpen] = useState(false);
   const { shortlist } = useShortlist();
+  const { token } = useAuth();
   const location = useLocation();
   useEffect(() => { setOpen(false); }, [location]);
   useEffect(() => {
@@ -45,6 +49,7 @@ function Header() {
         <NavLink to="/" end><House size={16} aria-hidden="true"/>Home</NavLink>
         <NavLink to="/creators"><Users size={16} aria-hidden="true"/>Creators {shortlist.length > 0 && <span className="nav-count">{shortlist.length}</span>}</NavLink>
         <NavLink to="/pricing"><Target size={16} aria-hidden="true"/>Pricing</NavLink>
+        {token ? <NavLink to="/dashboard"><LayoutDashboard size={16} aria-hidden="true"/>Dashboard</NavLink> : <NavLink to="/login"><LogIn size={16} aria-hidden="true"/>Creator login</NavLink>}
         <Link className="button button-dark mobile-cta" to="/start">Start a campaign <Rocket size={17} aria-hidden="true"/></Link>
       </nav>
       <Link className="button button-dark header-cta" to="/start">Start a campaign <Rocket size={17} aria-hidden="true"/></Link>
@@ -67,11 +72,11 @@ export default function App() {
   });
   useEffect(() => { writeStored('infloop-shortlist', shortlist); }, [shortlist]);
   const toggle = id => setShortlist(previous => previous.includes(id) ? previous.filter(item => item !== id) : [...previous, id]);
-  return <ShortlistContext.Provider value={{ shortlist, toggle }}>
+  return <AuthProvider><ShortlistContext.Provider value={{ shortlist, toggle }}>
     <ScrollToTop/>
     <a className="skip-link" href="#main-content" onClick={focusContent}><PanelTop size={16} aria-hidden="true"/>Skip to content</a>
     <Header/>
-    <main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home/>}/><Route path="/creators" element={<Creators/>}/><Route path="/pricing" element={<Pricing/>}/><Route path="/start" element={<Brief/>}/><Route path="*" element={<section className="container empty-state"><span className="eyebrow">OFF THE CIRCUIT</span><h1>Let’s get you<br/>back in the loop.</h1><Link className="button button-dark" to="/">Back to home <House size={17} aria-hidden="true"/></Link></section>}/></Routes></main>
+    <main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home/>}/><Route path="/creators" element={<Creators/>}/><Route path="/pricing" element={<Pricing/>}/><Route path="/start" element={<Brief/>}/><Route path="/login" element={<Login/>}/><Route path="/dashboard" element={<Dashboard/>}/><Route path="*" element={<section className="container empty-state"><span className="eyebrow">OFF THE CIRCUIT</span><h1>Let’s get you<br/>back in the loop.</h1><Link className="button button-dark" to="/">Back to home <House size={17} aria-hidden="true"/></Link></section>}/></Routes></main>
     <Footer/>
-  </ShortlistContext.Provider>;
+  </ShortlistContext.Provider></AuthProvider>;
 }

@@ -30,11 +30,15 @@ Clean-path browser routing uses the `/infloop/` base. The production build emits
 
 ## Deployment
 
-The public site is deployed to **https://anuragtyagi-si.github.io/infloop/** using `.github/workflows/pages.yml`. Pull requests run planner tests and the production build; pushes to `main` also publish to GitHub Pages. Set the repository's Pages source to **GitHub Actions**.
+The public site is deployed to **https://anuragtyagi-si.github.io/infloop/** using `.github/workflows/pages.yml`. Pull requests run planner tests and the production build (and the API tests when `api/` changes); pushes to `main` also publish to GitHub Pages. Set the repository's Pages source to **GitHub Actions**.
+
+## Creator accounts and API
+
+`api/` is a separate Node.js + PostgreSQL service with creator sign-up, login, and a campaigns endpoint; see [api/README.md](api/README.md). The site adds two pages that call it: **Creator login** (`/login`, log in or sign up) and **Dashboard** (`/dashboard`, the signed-in creator's campaigns). The API URL is read at build time from `VITE_API_URL` (`.env.development` for local work, `.env.production` for the published site). Without it, both pages say the API is not connected and the rest of the site is unaffected.
 
 ## Product boundaries
 
-This is a static marketing and campaign-planning experience, not a live talent marketplace or campaign-management backend. Creator identities, handles, follower counts, and engagement metrics are explicitly illustrative. No profile implies representation or availability. No creator booking, payment, email, or brief submission occurs. Briefs and shortlists stay in browser local storage, and the user can download their own brief.
+Apart from creator accounts, this is a static marketing and campaign-planning experience, not a live talent marketplace. Dashboard campaigns are illustrative samples. Creator identities, handles, follower counts, and engagement metrics are explicitly illustrative. No profile implies representation or availability. No creator booking, payment, email, or brief submission occurs. Briefs and shortlists stay in browser local storage, and the user can download their own brief.
 
 The planner is directional, not a forecast: it allocates 65% of a capped planning budget to illustrative creator fees ($1,400 for awareness/engagement or $1,900 for conversion scenarios). Content count is three pieces per creator, or four for scenarios of at least eight weeks. Impressions use illustrative budget multipliers of 95, 70, and 45 for awareness, engagement, and conversions. Estimates are not guaranteed or quoted.
 
