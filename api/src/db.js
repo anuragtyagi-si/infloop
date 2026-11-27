@@ -7,10 +7,8 @@ const migrationsDir = fileURLToPath(new URL('../migrations/', import.meta.url));
 export function createPool({ databaseUrl, databaseSsl }) {
   if (!databaseSsl) return withErrorListener(new pg.Pool({ connectionString: databaseUrl }));
   // pg lets sslmode in the URL override the ssl option, so DATABASE_SSL takes its place.
-  const url = new URL(databaseUrl);
-  url.searchParams.delete('sslmode');
-  const pool = new pg.Pool({ connectionString: url.toString(), ssl: { rejectUnauthorized: databaseSsl !== 'no-verify' } });
-  return withErrorListener(pool);
+  const connectionString = databaseUrl.replace(/([?&])sslmode=[^&]*&?/, '$1').replace(/[?&]$/, '');
+  return withErrorListener(new pg.Pool({ connectionString, ssl: { rejectUnauthorized: databaseSsl !== 'no-verify' } }));
 }
 
 function withErrorListener(pool) {
