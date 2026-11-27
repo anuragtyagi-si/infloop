@@ -8,6 +8,8 @@ export function loadConfig(env = process.env) {
     databaseUrl: env.DATABASE_URL,
     databaseSsl: env.DATABASE_SSL === 'true',
     jwtSecret,
+    // Number of reverse proxies in front of the API; 0 when it is reached directly.
+    trustProxy: Number(env.TRUST_PROXY) || false,
     corsOrigins: (env.CORS_ORIGINS || 'https://anuragtyagi-si.github.io,http://localhost:5173')
       .split(',').map(origin => origin.trim()).filter(Boolean),
   };

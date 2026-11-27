@@ -38,10 +38,10 @@ function readCredentials(body, { signup }) {
   return { email, password, name };
 }
 
-export function createApp({ pool, jwtSecret, corsOrigins = [], authRateLimit = { windowMs: 15 * 60 * 1000, limit: 30 } }) {
+export function createApp({ pool, jwtSecret, corsOrigins = [], trustProxy = false, authRateLimit = { windowMs: 15 * 60 * 1000, limit: 30 } }) {
   const app = express();
   app.disable('x-powered-by');
-  app.set('trust proxy', 1);
+  app.set('trust proxy', trustProxy);
   app.use(helmet());
   app.use(cors({ origin: corsOrigins, methods: ['GET', 'POST'], allowedHeaders: ['Content-Type', 'Authorization'], maxAge: 600 }));
   app.use(express.json({ limit: '10kb' }));
