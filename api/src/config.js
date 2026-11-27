@@ -1,6 +1,12 @@
+import { randomBytes } from 'node:crypto';
+
 export function loadConfig(env = process.env) {
-  const production = env.NODE_ENV === 'production';
-  const jwtSecret = env.JWT_SECRET || (production ? '' : 'dev-only-secret-change-me-dev-only-secret');
+  let jwtSecret = env.JWT_SECRET || '';
+  if (!jwtSecret && env.NODE_ENV !== 'production') {
+    // Local convenience: a per-process key, so logins end when the API restarts.
+    jwtSecret = randomBytes(32).toString('hex');
+    console.warn('JWT_SECRET is not set: using a temporary key, logins will not survive a restart.');
+  }
   if (jwtSecret.length < 32) throw new Error('JWT_SECRET must be set to at least 32 characters');
   if (!env.DATABASE_URL) throw new Error('DATABASE_URL must be set');
   return {

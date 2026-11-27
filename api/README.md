@@ -43,7 +43,7 @@ Then run the site from the repository root with `npm run dev`; `.env.development
 
 ## Configuration
 
-See `.env.example`: `DATABASE_URL`, `DATABASE_SSL`, `JWT_SECRET` (required in production, 32+ characters), `CORS_ORIGINS`, `PORT`.
+See `.env.example`: `DATABASE_URL`, `DATABASE_SSL`, `JWT_SECRET` (32+ characters; required in production, otherwise a temporary key is generated on each start), `CORS_ORIGINS`, `TRUST_PROXY`, `PORT`.
 
 ## Deploy
 
