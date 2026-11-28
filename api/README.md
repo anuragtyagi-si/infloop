@@ -7,24 +7,35 @@ A small, separate backend for the infloop site: creator sign-up and login, and t
 | Method | Path | Auth | Purpose |
 | --- | --- | --- | --- |
 | GET | `/health` | – | Checks the API and database |
-| POST | `/auth/signup` | – | `{ name, email, password }` → `201 { token, user }` |
-| POST | `/auth/login` | – | `{ email, password }` → `{ token, user }` |
+| POST | `/auth/signup` | – | `{ name, email, password }` → `202 { email, message }`; emails a verification link, no session |
+| POST | `/auth/verify` | – | `{ token }` from the emailed link → activates the account |
+| POST | `/auth/resend-verification` | – | `{ email }` → sends a new link if the account is unverified |
+| POST | `/auth/login` | – | `{ email, password }` → `{ token, user }`; `403` with `code: "email_not_verified"` until verified |
 | GET | `/auth/me` | Bearer | The signed-in user |
 | GET | `/campaigns` | Bearer | Campaigns the signed-in creator is on, active first |
 
-Errors are JSON: `{ "error": "message", "fields": { "email": "…" } }` (`fields` only for validation errors).
+Errors are JSON: `{ "error": "message", "fields": { "email": "…" } }` (`fields` only for validation errors; some errors also carry a `code`).
 
 Passwords are hashed with bcrypt (cost 12). Login returns a JWT (HS256, 7 days) that the site sends as `Authorization: Bearer <token>`. Auth routes are rate-limited to 30 requests per 15 minutes per IP, and CORS only allows the origins in `CORS_ORIGINS`.
+
+## Email verification
+
+Sign-up creates the account unverified and emails a link to `APP_URL/verify/?token=…`; no session is issued until the link is used, and login refuses unverified accounts. The link works once and expires after 24 hours; only a SHA-256 hash of its token is stored. Requesting a new link (at most one per minute) or signing up again invalidates earlier links.
+
+An unverified account does not reserve its address: signing up again with the same email replaces its name and password. Sign-up and resend answer the same way whether or not the email already has an account (a verified address gets a "you already have an account" email instead), so they do not reveal which emails are registered.
+
+Email is sent with [Resend](https://resend.com) using `RESEND_API_KEY` and the sender in `EMAIL_FROM` (an address on a domain verified in Resend). Without a key, which is only allowed outside production, the email is printed to the server console so the link can be copied from there.
 
 ## Data
 
 `migrations/*.sql` are applied once each, in order, on start (or with `npm run migrate`).
 
-- `users`: creator accounts (unique email, case-insensitive).
+- `users`: creator accounts (unique email, case-insensitive; `email_verified_at` is null until verified).
+- `email_verifications`: hashed single-use verification tokens with their expiry.
 - `campaigns`: brand, title, goal, platform, deliverables, creator fee, dates.
 - `campaign_creators`: which creator is on which campaign, with status `invited`, `active` or `completed`.
 
-`002_sample_campaigns.sql` adds five illustrative campaigns (`is_sample`). Each new account is added to them so the dashboard has data until real campaign assignment exists; the site labels them "Sample".
+`002_sample_campaigns.sql` adds five illustrative campaigns (`is_sample`). Each account is added to them when it is verified, so the dashboard has data until real campaign assignment exists; the site labels them "Sample".
 
 ## Run locally
 
@@ -37,13 +48,13 @@ npm ci
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/infloop npm start   # http://localhost:4000
 ```
 
-Then run the site from the repository root with `npm run dev`; `.env.development` points it at `http://localhost:4000`.
+Then run the site from the repository root with `npm run dev`; `.env.development` points it at `http://localhost:4000`. After signing up, open the verification link that the API prints to its console.
 
 `npm test` creates and drops a throwaway database on the server in `DATABASE_URL` (default `postgres://postgres:postgres@localhost:5432/postgres`).
 
 ## Configuration
 
-See `.env.example`: `DATABASE_URL`, `DATABASE_SSL`, `JWT_SECRET` (32+ characters; required in production, otherwise a temporary key is generated on each start), `CORS_ORIGINS`, `TRUST_PROXY`, `PORT`.
+See `.env.example`: `DATABASE_URL`, `DATABASE_SSL`, `JWT_SECRET` (32+ characters; required in production, otherwise a temporary key is generated on each start), `CORS_ORIGINS`, `TRUST_PROXY`, `PORT`, and for email `RESEND_API_KEY` and `EMAIL_FROM` (both required in production) and `APP_URL` (the site's address, used in verification links).
 
 ## Deploy
 

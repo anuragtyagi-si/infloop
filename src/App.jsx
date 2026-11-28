@@ -7,6 +7,7 @@ import Creators from './pages/Creators';
 import Pricing from './pages/Pricing';
 import Brief from './pages/Brief';
 import Login from './pages/Login';
+import Verify from './pages/Verify';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider, useAuth } from './api';
 import { readStored, writeStored } from './lib';
@@ -25,7 +26,7 @@ function ScrollToTop() {
   const location = useLocation();
   useEffect(() => {
     window.scrollTo(0, 0);
-    const titles = { '/': 'Influence. In full loop.', '/creators': 'Find your people', '/pricing': 'Ambition, meet your plan', '/start': 'Start your next loop', '/login': 'Creator login', '/dashboard': 'Your campaigns' };
+    const titles = { '/': 'Influence. In full loop.', '/creators': 'Find your people', '/pricing': 'Ambition, meet your plan', '/start': 'Start your next loop', '/login': 'Creator login', '/verify': 'Verify your email', '/dashboard': 'Your campaigns' };
     document.title = `infloop — ${titles[location.pathname.replace(/\/$/, '') || '/'] || 'Page not found'}`;
   }, [location.pathname]);
   return null;
@@ -76,7 +77,7 @@ export default function App() {
     <ScrollToTop/>
     <a className="skip-link" href="#main-content" onClick={focusContent}><PanelTop size={16} aria-hidden="true"/>Skip to content</a>
     <Header/>
-    <main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home/>}/><Route path="/creators" element={<Creators/>}/><Route path="/pricing" element={<Pricing/>}/><Route path="/start" element={<Brief/>}/><Route path="/login" element={<Login/>}/><Route path="/dashboard" element={<Dashboard/>}/><Route path="*" element={<section className="container empty-state"><span className="eyebrow">OFF THE CIRCUIT</span><h1>Let’s get you<br/>back in the loop.</h1><Link className="button button-dark" to="/">Back to home <House size={17} aria-hidden="true"/></Link></section>}/></Routes></main>
+    <main id="main-content" tabIndex={-1}><Routes><Route path="/" element={<Home/>}/><Route path="/creators" element={<Creators/>}/><Route path="/pricing" element={<Pricing/>}/><Route path="/start" element={<Brief/>}/><Route path="/login" element={<Login/>}/><Route path="/verify" element={<Verify/>}/><Route path="/dashboard" element={<Dashboard/>}/><Route path="*" element={<section className="container empty-state"><span className="eyebrow">OFF THE CIRCUIT</span><h1>Let’s get you<br/>back in the loop.</h1><Link className="button button-dark" to="/">Back to home <House size={17} aria-hidden="true"/></Link></section>}/></Routes></main>
     <Footer/>
   </ShortlistContext.Provider></AuthProvider>;
 }

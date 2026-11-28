@@ -34,7 +34,7 @@ The public site is deployed to **https://anuragtyagi-si.github.io/infloop/** usi
 
 ## Creator accounts and API
 
-`api/` is a separate Node.js + PostgreSQL service with creator sign-up, login, and a campaigns endpoint; see [api/README.md](api/README.md). The site adds two pages that call it: **Creator login** (`/login`, log in or sign up) and **Dashboard** (`/dashboard`, the signed-in creator's campaigns). The API URL is read at build time from `VITE_API_URL` (`.env.development` for local work, `.env.production` for the published site). Without it, both pages say the API is not connected and the rest of the site is unaffected.
+`api/` is a separate Node.js + PostgreSQL service with creator sign-up, login, and a campaigns endpoint; see [api/README.md](api/README.md). The site adds three pages that call it: **Creator login** (`/login`, log in or sign up), **Verify** (`/verify`, where the emailed verification link lands; new accounts must verify their email before they can log in) and **Dashboard** (`/dashboard`, the signed-in creator's campaigns). The API URL is read at build time from `VITE_API_URL` (`.env.development` for local work, `.env.production` for the published site). Without it, these pages say the API is not connected and the rest of the site is unaffected.
 
 ## Product boundaries
 

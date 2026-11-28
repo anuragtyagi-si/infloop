@@ -25,3 +25,9 @@ services:
         value: https://anuragtyagi-si.github.io
       - key: TRUST_PROXY
         value: 1
+      - key: APP_URL
+        value: https://anuragtyagi-si.github.io/infloop
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false

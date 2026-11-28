@@ -5,10 +5,11 @@ export const API_URL = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 const TOKEN_KEY = 'infloop-token';
 
 export class ApiError extends Error {
-  constructor(message, status, fields) {
+  constructor(message, status, fields, code) {
     super(message);
     this.status = status;
     this.fields = fields || {};
+    this.code = code;
   }
 }
 
@@ -25,7 +26,7 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
     throw new ApiError('We could not reach the infloop API. Check your connection and try again.', 0);
   }
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new ApiError(data.error || 'Something went wrong. Try again.', response.status, data.fields);
+  if (!response.ok) throw new ApiError(data.error || 'Something went wrong. Try again.', response.status, data.fields, data.code);
   return data;
 }
 
@@ -55,14 +56,14 @@ export function AuthProvider({ children }) {
     return () => { current = false; };
   }, [token, user, logout]);
 
-  const authenticate = useCallback(async (mode, credentials) => {
-    const data = await apiRequest(mode === 'signup' ? '/auth/signup' : '/auth/login', { method: 'POST', body: credentials });
+  const login = useCallback(async credentials => {
+    const data = await apiRequest('/auth/login', { method: 'POST', body: credentials });
     storeToken(data.token);
     setUser(data.user);
     setToken(data.token);
     return data.user;
   }, []);
 
-  const value = useMemo(() => ({ token, user, loading, authenticate, logout }), [token, user, loading, authenticate, logout]);
+  const value = useMemo(() => ({ token, user, loading, login, logout }), [token, user, loading, login, logout]);
   return createElement(AuthContext.Provider, { value }, children);
 }
