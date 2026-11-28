@@ -18,7 +18,7 @@ const linkToken = message => new URL(message.text.match(/https?:\/\/\S+/)[0]).se
 // Signs up, follows the emailed link, and logs in.
 async function register(details) {
   await call('POST', '/auth/signup', { body: details });
-  await call('POST', '/auth/verify', { body: { token: linkToken(outbox.at(-1)) } });
+  await call('POST', '/auth/verify', { body: { token: linkToken(outbox.at(-1)), password: details.password } });
   return (await call('POST', '/auth/login', { body: { email: details.email, password: details.password } })).body;
 }
 
@@ -104,9 +104,25 @@ test('an unverified sign-up does not reserve the address', async () => {
   const squatterToken = linkToken(outbox.at(-1));
   assert.equal((await call('POST', '/auth/signup', { body: account })).status, 202);
   assert.equal((await pool.query('SELECT 1 FROM users WHERE lower(email) = $1', [account.email])).rowCount, 1);
-  assert.equal((await call('POST', '/auth/verify', { body: { token: squatterToken } })).status, 400, 'the earlier link stops working');
+  assert.equal((await call('POST', '/auth/verify', { body: { token: squatterToken, password: squatter.password } })).status, 400, 'the earlier link stops working');
   const login = await call('POST', '/auth/login', { body: { email: account.email, password: squatter.password } });
   assert.equal(login.status, 401, 'the earlier password is replaced');
+});
+
+test('a link from someone else\'s sign-up cannot activate their password', async () => {
+  const owner = { name: 'Owner', email: 'owner@example.com', password: 'owner-password-1' };
+  const intruder = { ...owner, name: 'Intruder', password: 'intruder-password-1' };
+  await call('POST', '/auth/signup', { body: owner });
+  await call('POST', '/auth/signup', { body: intruder });
+  const token = linkToken(outbox.at(-1));
+  const refused = await call('POST', '/auth/verify', { body: { token, password: owner.password } });
+  assert.equal(refused.status, 400);
+  assert.equal(refused.body.code, 'verification_password_mismatch');
+  assert.equal((await call('POST', '/auth/login', { body: { email: owner.email, password: intruder.password } })).status, 403, 'still unverified');
+  await call('POST', '/auth/signup', { body: owner });
+  const own = await call('POST', '/auth/verify', { body: { token: linkToken(outbox.at(-1)), password: owner.password } });
+  assert.equal(own.status, 200);
+  assert.equal((await call('POST', '/auth/login', { body: { email: owner.email, password: intruder.password } })).status, 401);
 });
 
 test('resend issues a new link, replaces the old one, and reveals nothing', async () => {
@@ -120,28 +136,31 @@ test('resend issues a new link, replaces the old one, and reveals nothing', asyn
   const unknown = await call('POST', '/auth/resend-verification', { body: { email: 'nobody@example.com' } });
   assert.deepEqual(sent, { ...unknown, headers: sent.headers });
   assert.equal(outbox.length, before + 1);
-  assert.equal((await call('POST', '/auth/verify', { body: { token: oldToken } })).status, 400);
+  assert.equal((await call('POST', '/auth/verify', { body: { token: oldToken, password: account.password } })).status, 400);
   assert.equal((await call('POST', '/auth/resend-verification', { body: { email: 'nope' } })).status, 400);
 });
 
 test('verification rejects bad and expired links', async () => {
   for (const token of [undefined, '', 'garbage', 42]) {
-    const { status, body } = await call('POST', '/auth/verify', { body: { token } });
+    const { status, body } = await call('POST', '/auth/verify', { body: { token, password: account.password } });
     assert.equal(status, 400);
     assert.equal(body.code, 'invalid_verification_token');
   }
   await pool.query(`UPDATE email_verifications SET expires_at = now() - interval '1 second'`);
-  assert.equal((await call('POST', '/auth/verify', { body: { token: linkToken(outbox.at(-1)) } })).status, 400);
+  assert.equal((await call('POST', '/auth/verify', { body: { token: linkToken(outbox.at(-1)), password: account.password } })).status, 400);
   await pool.query(`UPDATE email_verifications SET expires_at = now() + interval '1 hour'`);
 });
 
 test('the link verifies the account once, then login works', async () => {
   const token = linkToken(outbox.at(-1));
-  const verified = await call('POST', '/auth/verify', { body: { token } });
+  const missing = await call('POST', '/auth/verify', { body: { token } });
+  assert.equal(missing.status, 400);
+  assert.ok(missing.body.fields.password, 'the link alone does not activate the account');
+  const verified = await call('POST', '/auth/verify', { body: { token, password: account.password } });
   assert.equal(verified.status, 200);
   assert.equal(verified.body.email, account.email);
   assert.equal(verified.body.token, undefined, 'verifying does not log in');
-  assert.equal((await call('POST', '/auth/verify', { body: { token } })).status, 400, 'the link is single-use');
+  assert.equal((await call('POST', '/auth/verify', { body: { token, password: account.password } })).status, 400, 'the link is single-use');
   assert.equal((await pool.query('SELECT 1 FROM email_verifications')).rowCount, 0);
   const ok = await call('POST', '/auth/login', { body: { email: 'Maya@Example.com', password: account.password } });
   assert.equal(ok.status, 200);

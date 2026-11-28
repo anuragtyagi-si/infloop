@@ -1,25 +1,31 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { LogIn, MailCheck, MailWarning } from 'lucide-react';
 import { apiRequest } from '../api';
 import { LoopMark } from '../components/Logo';
 
 // Landing page for the link in the verification email: /verify?token=…
+// The link alone does not activate the account; the sign-up password is asked for too.
 export default function Verify() {
   const token = useSearchParams()[0].get('token') || '';
-  const [state, setState] = useState({ status: token ? 'checking' : 'failed', message: token ? '' : 'This verification link is incomplete. Request a new one below.' });
+  const [state, setState] = useState({ status: token ? 'ready' : 'failed', message: token ? '' : 'This verification link is incomplete. Request a new one below.' });
+  const [password, setPassword] = useState('');
+  const [verifying, setVerifying] = useState({ busy: false, error: '' });
   const [email, setEmail] = useState('');
   const [resend, setResend] = useState({ busy: false, note: '', error: '' });
-  // The link is single-use, so the request must go out once even when effects re-run.
-  const request = useRef(null);
 
-  useEffect(() => {
-    if (!token) return;
-    request.current ||= apiRequest('/auth/verify', { method: 'POST', body: { token } });
-    request.current
-      .then(data => setState({ status: 'verified', message: data.email }))
-      .catch(failure => setState({ status: 'failed', message: failure.message }));
-  }, [token]);
+  const verify = async event => {
+    event.preventDefault();
+    setVerifying({ busy: true, error: '' });
+    try {
+      const data = await apiRequest('/auth/verify', { method: 'POST', body: { token, password } });
+      setState({ status: 'verified', message: data.email });
+    } catch (failure) {
+      // A wrong password keeps the link usable; anything else about the link does not.
+      if (failure.code === 'invalid_verification_token') setState({ status: 'failed', message: failure.message });
+      else setVerifying({ busy: false, error: failure.fields?.password || failure.message });
+    }
+  };
 
   const submit = async event => {
     event.preventDefault();
@@ -40,7 +46,16 @@ export default function Verify() {
     </div>
     <div className="brief-main auth-card">
       <div className="brief-form verify-state" aria-live="polite">
-        {state.status === 'checking' && <div className="form-section-heading"><span className="mini-label">ONE MOMENT</span><h2>Verifying your email…</h2></div>}
+        {state.status === 'ready' && <form onSubmit={verify}>
+          <div className="form-section-heading"><span className="mini-label">ONE MORE STEP</span><h2>Confirm it’s you.</h2></div>
+          <p className="verify-copy"><MailCheck size={18} aria-hidden="true"/><span>Enter the password you chose when signing up to verify your email and activate your account.</span></p>
+          <label className="field">Password<input name="password" type="password" required autoFocus autoComplete="current-password" value={password} onChange={e => { setPassword(e.target.value); setVerifying(v => ({ ...v, error: '' })); }}/></label>
+          {verifying.error && <p className="form-error" role="alert">{verifying.error}</p>}
+          <div className="form-actions">
+            <Link className="text-link" to="/login?mode=signup">Sign up again</Link>
+            <button type="submit" className="button button-dark" disabled={verifying.busy}>{verifying.busy ? 'Verifying…' : 'Verify email'}</button>
+          </div>
+        </form>}
         {state.status === 'verified' && <>
           <div className="form-section-heading"><span className="mini-label">ALL SET</span><h2>Your email is verified.</h2></div>
           <p className="verify-copy"><MailCheck size={18} aria-hidden="true"/><span><strong>{state.message}</strong> is confirmed and your account is active. Log in to see your campaigns.</span></p>

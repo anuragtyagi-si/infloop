@@ -64,7 +64,7 @@ export default function Login() {
       </div>
       {sentTo ? <div className="brief-form verify-state">
         <div className="form-section-heading"><span className="mini-label">ONE MORE STEP</span><h2>Check your email to verify.</h2></div>
-        <p className="verify-copy"><MailCheck size={18} aria-hidden="true"/><span>We sent a verification link to <strong>{sentTo}</strong>. Open it within 24 hours to activate your account, then log in.</span></p>
+        <p className="verify-copy"><MailCheck size={18} aria-hidden="true"/><span>We sent a verification link to <strong>{sentTo}</strong>. Open it within 24 hours and confirm your password to activate your account, then log in.</span></p>
         {resent && <p className="form-note" role="status">{resent}</p>}
         {error && <p className="form-error" role="alert">{error}</p>}
         <div className="form-actions">

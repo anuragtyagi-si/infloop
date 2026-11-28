@@ -97,7 +97,7 @@ export function createApp({ pool, jwtSecret, sendEmail, appUrl, corsOrigins = []
       subject: 'Verify your email for infloop',
       // No sign-up input other than the address goes into the email: anyone can sign up with someone else's address.
       text: `Confirm this email address to finish creating your infloop creator account:\n\n${appUrl}/verify/?token=${token}\n\n`
-        + `The link works once and expires in ${VERIFICATION_HOURS} hours. If you did not sign up for infloop, ignore this email and no account will be activated.`,
+        + `You will be asked for the password you chose when signing up. The link works once and expires in ${VERIFICATION_HOURS} hours. If you did not sign up for infloop, ignore this email and no account will be activated.`,
     };
   }
 
@@ -147,15 +147,27 @@ export function createApp({ pool, jwtSecret, sendEmail, appUrl, corsOrigins = []
 
   app.post('/auth/verify', authLimiter, async (req, res) => {
     const token = typeof req.body?.token === 'string' ? req.body.token : '';
+    const password = typeof req.body?.password === 'string' ? req.body.password : '';
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
       const { rows } = await client.query(
-        'DELETE FROM email_verifications WHERE token_hash = $1 AND expires_at > now() RETURNING user_id',
+        `SELECT u.id, u.password_hash FROM email_verifications v JOIN users u ON u.id = v.user_id
+         WHERE v.token_hash = $1 AND v.expires_at > now() FOR UPDATE`,
         [hashToken(token)],
       );
       if (!rows[0]) throw new HttpError(400, 'This verification link is invalid or has expired. Request a new one.', undefined, 'invalid_verification_token');
-      const userId = rows[0].user_id;
+      // The link proves who owns the inbox; the password proves the link came from this person's own
+      // sign-up. Without it, someone who signs up again for a pending address could have the owner
+      // activate a password the owner never chose.
+      if (!password) throw new HttpError(400, 'Check the highlighted fields.', { password: 'Enter the password you chose when signing up.' });
+      if (!await bcrypt.compare(password, rows[0].password_hash)) throw new HttpError(
+        400,
+        'That is not the password this link was created with. If you signed up more than once, use the newest email; otherwise sign up again.',
+        undefined,
+        'verification_password_mismatch',
+      );
+      const userId = rows[0].id;
       const user = await client.query('UPDATE users SET email_verified_at = now() WHERE id = $1 RETURNING email', [userId]);
       await client.query('DELETE FROM email_verifications WHERE user_id = $1', [userId]);
       await client.query(

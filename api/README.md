@@ -8,7 +8,7 @@ A small, separate backend for the infloop site: creator sign-up and login, and t
 | --- | --- | --- | --- |
 | GET | `/health` | – | Checks the API and database |
 | POST | `/auth/signup` | – | `{ name, email, password }` → `202 { email, message }`; emails a verification link, no session |
-| POST | `/auth/verify` | – | `{ token }` from the emailed link → activates the account |
+| POST | `/auth/verify` | – | `{ token, password }`: the token from the emailed link plus the sign-up password → activates the account |
 | POST | `/auth/resend-verification` | – | `{ email }` → sends a new link if the account is unverified |
 | POST | `/auth/login` | – | `{ email, password }` → `{ token, user }`; `403` with `code: "email_not_verified"` until verified |
 | GET | `/auth/me` | Bearer | The signed-in user |
@@ -20,7 +20,7 @@ Passwords are hashed with bcrypt (cost 12). Login returns a JWT (HS256, 7 days) 
 
 ## Email verification
 
-Sign-up creates the account unverified and emails a link to `APP_URL/verify/?token=…`; no session is issued until the link is used, and login refuses unverified accounts. The link works once and expires after 24 hours; only a SHA-256 hash of its token is stored. Requesting a new link (at most one per minute) or signing up again invalidates earlier links.
+Sign-up creates the account unverified and emails a link to `APP_URL/verify/?token=…`; no session is issued until the link is used, and login refuses unverified accounts. The verification page asks for the sign-up password as well: the link proves who owns the inbox and the password proves the link came from that person's own sign-up, so a link triggered by someone else's sign-up for the same address cannot activate a password its owner did not choose. A wrong password leaves the link usable. The link works once and expires after 24 hours; only a SHA-256 hash of its token is stored. Requesting a new link (at most one per minute) or signing up again invalidates earlier links.
 
 An unverified account does not reserve its address: signing up again with the same email replaces its name and password. Sign-up and resend answer the same way whether or not the email already has an account (a verified address gets a "you already have an account" email instead), so they do not reveal which emails are registered.
 
