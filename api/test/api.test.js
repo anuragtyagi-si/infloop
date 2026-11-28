@@ -167,6 +167,15 @@ test('signing up with a verified email changes nothing and answers like a new si
   assert.equal(outbox.length, before + 2, 'verified accounts get no verification email');
 });
 
+test('verification emails carry no text chosen by whoever signed up', async () => {
+  outbox.length = 0;
+  const res = await call('POST', '/auth/signup', {
+    body: { name: 'https://evil.example/claim', email: 'bystander@example.com', password: 'password123' },
+  });
+  assert.equal(res.status, 202);
+  assert.ok(!outbox[0].text.includes('evil.example'));
+});
+
 test('a failed email send is reported and can be retried', async () => {
   failEmail = true;
   const details = { name: 'Sam', email: 'sam@example.com', password: 'another-pass-3' };

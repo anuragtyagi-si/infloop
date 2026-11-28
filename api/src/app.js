@@ -95,7 +95,8 @@ export function createApp({ pool, jwtSecret, sendEmail, appUrl, corsOrigins = []
     return {
       to: user.email,
       subject: 'Verify your email for infloop',
-      text: `Hi ${user.name},\n\nConfirm this email address to finish creating your infloop creator account:\n\n${appUrl}/verify/?token=${token}\n\n`
+      // No sign-up input other than the address goes into the email: anyone can sign up with someone else's address.
+      text: `Confirm this email address to finish creating your infloop creator account:\n\n${appUrl}/verify/?token=${token}\n\n`
         + `The link works once and expires in ${VERIFICATION_HOURS} hours. If you did not sign up for infloop, ignore this email and no account will be activated.`,
     };
   }
