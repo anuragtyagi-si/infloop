@@ -462,6 +462,59 @@ fieldset { padding: 0; margin: 0; border: 0; min-width: 0; }
 @keyframes reveal { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
 
 /* Responsive layouts: every interaction remains available without overflow. */
+/* Creator accounts: login and campaign dashboard (data from the infloop API) */
+.auth-page { display: grid; grid-template-columns: 1fr minmax(0, 480px); gap: 60px; align-items: start; padding-block: 68px 100px; }
+.auth-intro h1 { font-size: clamp(53px,5.4vw,76px); }
+.auth-intro .eyebrow { font-size: 8px; }
+.auth-intro > p { font-size: 13px; color: var(--muted); margin-block: 23px 30px; max-width: 360px; }
+.auth-tabs { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--line); }
+.auth-tabs button { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 17px; font-size: 11px; background: #f3f5ec; color: #7b8873; }
+.auth-tabs button.active { background: transparent; color: var(--green); font-weight: 550; box-shadow: inset 0 -2px var(--green); }
+.auth-card .form-section-heading { margin-bottom: 6px; }
+.field-error { display: block; color: #a43a29; font-size: 10px; margin-top: 7px; }
+.field input[aria-invalid="true"] { border-color: #c9806f; }
+.form-note { font-size: 11px; color: var(--green); background: #f3f5ec; padding: 13px; border-radius: 4px; margin-top: 20px; }
+.verify-copy { display: flex; gap: 12px; font-size: 13px; line-height: 1.6; color: var(--muted); margin-top: 18px; overflow-wrap: anywhere; }
+.verify-copy svg { flex: none; margin-top: 2px; color: var(--green); }
+.verify-copy strong { color: var(--green); font-weight: 550; }
+.verify-state .field { margin-top: 22px; }
+.verify-resend { display: block; margin-top: 14px; }
+.auth-mark { width: 18px; height: 14px; }
+.dashboard-page { padding-block: 68px 100px; }
+.dashboard-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin: 0 0 40px; }
+.dashboard-stats > div { border: 1px solid var(--line); border-radius: 8px; padding: 22px 24px; background: #fbfcf7; }
+.dashboard-stats dt { font-size: 10px; color: #7e8b71; }
+.dashboard-stats dd { margin: 9px 0 0; font-family: 'Space Grotesk',sans-serif; font-size: 34px; letter-spacing: -1.4px; }
+.dashboard-page .filter-row { display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; padding-bottom: 20px; }
+.dashboard-page .niche-filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.campaign-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+.campaign-row { display: grid; grid-template-columns: 1.3fr 1fr auto; gap: 30px; align-items: center; padding-block: 26px; border-bottom: 1px solid var(--line); }
+.campaign-main .mini-label { color: #7c8d6b; font-size: 8px; }
+.campaign-main h2 { font-size: 25px; letter-spacing: -.7px; margin-top: 8px; }
+.campaign-main p { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.sample-tag { font-style: normal; letter-spacing: .4px; border: 1px solid #c3d2ac; border-radius: 3px; padding: 1px 5px; }
+.campaign-meta { display: flex; flex-direction: column; gap: 9px; font-size: 11px; color: #5d6a5d; }
+.campaign-meta span { display: flex; align-items: center; gap: 8px; }
+.campaign-side { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; min-width: 110px; }
+.campaign-side strong { font-family: 'Space Grotesk',sans-serif; font-weight: 500; font-size: 20px; }
+.status-badge { font-size: 9px; font-weight: 600; letter-spacing: .6px; padding: 5px 9px; border-radius: 3px; border: 1px solid #c3d2ac; }
+.status-active { background: var(--lime); border-color: var(--lime); }
+.status-completed { color: #7e8b71; border-color: var(--line); }
+@media (max-width: 900px) {
+  .auth-page { grid-template-columns: 1fr; gap: 36px; }
+  .dashboard-stats { grid-template-columns: 1fr 1fr; }
+  .campaign-row { grid-template-columns: 1fr auto; }
+  .campaign-meta { grid-column: 1 / -1; grid-row: 2; flex-direction: row; flex-wrap: wrap; gap: 9px 20px; }
+}
+@media (max-width: 650px) {
+  .auth-page, .dashboard-page { padding-block: 40px 70px; }
+  .dashboard-page .brief-page-heading { flex-direction: column; align-items: flex-start; }
+  .dashboard-stats { gap: 10px; }
+  .dashboard-stats > div { padding: 16px; }
+  .dashboard-stats dd { font-size: 27px; }
+  .campaign-main h2 { font-size: 21px; }
+}
+
 @media (min-width: 1550px) {
   .hero-main { padding-block: 28px 35px; }
   .hero-visual { min-height: 520px; }

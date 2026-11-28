@@ -1,0 +1,33 @@
+# Render blueprint for the infloop API (api/) and its PostgreSQL database.
+databases:
+  - name: infloop-db
+    plan: free
+    databaseName: infloop
+services:
+  - type: web
+    name: infloop-api
+    runtime: node
+    plan: free
+    rootDir: api
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: infloop-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://anuragtyagi-si.github.io
+      - key: TRUST_PROXY
+        value: 1
+      - key: APP_URL
+        value: https://anuragtyagi-si.github.io/infloop
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
