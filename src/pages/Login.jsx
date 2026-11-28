@@ -42,7 +42,7 @@ export default function Login() {
     setBusy(true); setError(''); setResent('');
     try {
       await apiRequest('/auth/resend-verification', { method: 'POST', body: { email } });
-      setResent(`We sent a new link to ${email}. Earlier links no longer work.`);
+      setResent(`A new link is on its way to ${email}, unless one was sent in the last minute. Earlier links stop working when it arrives.`);
     } catch (failure) {
       setError(failure.message);
     } finally {
@@ -79,7 +79,7 @@ export default function Login() {
         <label className="field">Password<input name="password" type="password" required minLength={signup ? 8 : undefined} maxLength={72} autoComplete={signup ? 'new-password' : 'current-password'} value={form.password} onChange={e => update('password', e.target.value)} aria-invalid={Boolean(fields.password)} placeholder={signup ? 'At least 8 characters' : 'Your password'}/>{fields.password && <small className="field-error">{fields.password}</small>}</label>
         {error && <p className="form-error" role="alert">{error}</p>}
         {resent && <p className="form-note" role="status">{resent}</p>}
-        {pending && !resent && <button type="button" className="text-link verify-resend" disabled={busy} onClick={() => resend(pending)}>Resend verification email</button>}
+        {pending && <button type="button" className="text-link verify-resend" disabled={busy} onClick={() => resend(pending)}>Resend verification email</button>}
         <div className="form-actions">
           <button type="button" className="text-link" onClick={() => switchMode(!signup)}>{signup ? 'I already have an account' : 'Create an account'}</button>
           <button type="submit" className="button button-dark" disabled={busy || !API_URL}>{busy ? 'One moment…' : signup ? 'Create account' : 'Log in'}{signup ? <UserPlus size={17} aria-hidden="true"/> : <LogIn size={17} aria-hidden="true"/>}</button>
