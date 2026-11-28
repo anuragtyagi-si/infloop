@@ -176,6 +176,17 @@ test('verification emails carry no text chosen by whoever signed up', async () =
   assert.ok(!outbox[0].text.includes('evil.example'));
 });
 
+test('resend answers the same when the email provider fails', async () => {
+  await call('POST', '/auth/signup', { body: { name: 'Slow', email: 'slow@example.com', password: 'password123' } });
+  await pool.query("UPDATE email_verifications SET created_at = now() - interval '2 minutes' WHERE user_id = (SELECT id FROM users WHERE email = 'slow@example.com')");
+  failEmail = true;
+  const pending = await call('POST', '/auth/resend-verification', { body: { email: 'slow@example.com' } });
+  const unknown = await call('POST', '/auth/resend-verification', { body: { email: 'nobody-here@example.com' } });
+  failEmail = false;
+  assert.equal(pending.status, 200);
+  assert.deepEqual(pending.body, unknown.body);
+});
+
 test('a failed email send is reported and can be retried', async () => {
   failEmail = true;
   const details = { name: 'Sam', email: 'sam@example.com', password: 'another-pass-3' };

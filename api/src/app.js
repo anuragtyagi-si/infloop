@@ -188,7 +188,11 @@ export function createApp({ pool, jwtSecret, sendEmail, appUrl, corsOrigins = []
                          WHERE v.user_id = u.id AND v.created_at > now() - make_interval(secs => $2))`,
       [email, RESEND_COOLDOWN_SECONDS],
     );
-    if (rows[0]) await deliver(await issueVerification(pool, rows[0]));
+    // Not awaited: waiting for the provider only for pending accounts would reveal them by timing or failure.
+    if (rows[0]) {
+      const message = await issueVerification(pool, rows[0]);
+      sendEmail(message).catch(error => console.error('Sending email failed:', error.message));
+    }
     res.json({ message: 'If that address has an account waiting to be verified, a new link is on its way.' });
   });
 
